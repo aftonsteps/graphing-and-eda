@@ -1,0 +1,184 @@
+---
+title: "Pokemon EDA"
+author: "Afton Coombs"
+date: "12/30/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(magrittr)
+```
+
+```{r load-data}
+## This dataset comes from: https://www.kaggle.com/rounakbanik/pokemon
+## TODO: Get data programatically
+pokedata <- readr::read_csv("pokemon/pokemon.csv")
+```
+
+```{r get-summary-of-data}
+summary(pokedata)
+```
+```{r explore-weird-cols}
+unique(pokedata$capture_rate)
+```
+
+```{r attr-pair-plot}
+pokedata_attr <-
+  pokedata %>%
+  dplyr::select(attack,
+                defense,
+                hp,
+                sp_attack,
+                sp_defense,
+                speed,
+                height_m,
+                weight_kg)
+GGally::ggpairs(pokedata_attr)
+```
+
+```{r non-legend-attr-pair-plot}
+non_legend_attr <- 
+  pokedata_attr[pokedata$is_legendary == 0, ]
+GGally::ggpairs(non_legend_attr)
+```
+```{r defense-pair-plot}
+defense_data <-
+  pokedata %>%
+  dplyr::select(dplyr::contains("against"))
+GGally::ggpairs(defense_data)
+```
+
+```{r table-types-1}
+table(pokedata$type1)
+```
+
+```{r table-types-2}
+table(pokedata$type2)
+```
+
+```{r prep-type-data}
+type_data <-
+  pokedata %>% 
+  dplyr::select(name, generation, type1, type2) %>%
+  dplyr::mutate(type2 = ifelse(test = is.na(type2),
+                               yes = "_none_",
+                               no = type2))
+type_data_no_na <-
+  pokedata %>% 
+  dplyr::select(name, generation, type1, type2)
+
+get_two_type_props <- function(type_data) {
+  type1_props <-
+    type_data %>%
+    dplyr::filter(!is.na(type1)) %>%
+    dplyr::group_by(type1) %>%
+    dplyr::summarize(type_1_count = dplyr::n()) %>%
+    dplyr::mutate(type_1_prop = 
+                    type_1_count / 
+                    sum(type_1_count, na.rm = TRUE))
+  
+  type2_props <-
+    type_data %>%
+    dplyr::filter(!is.na(type2)) %>%
+    dplyr::group_by(type2) %>%
+    dplyr::summarize(type_2_count = dplyr::n()) %>%
+    dplyr::mutate(type_2_prop = 
+                    type_2_count / 
+                    sum(type_2_count, na.rm = TRUE))
+  
+  type_props <-
+    type1_props %>%
+    dplyr::full_join(type2_props, 
+                     by = c("type1" = "type2")) %>%
+    dplyr::select(type = type1, dplyr::everything()) %>%
+    dplyr::select(-dplyr::contains("count")) %>%
+    tidyr::pivot_longer(cols = 
+                          c(type_1_prop, type_2_prop)) %>%
+    dplyr::mutate(name = gsub(pattern = "_prop",
+                              replacement = "",
+                              name)) %>%
+    dplyr::mutate(name = gsub(pattern = "_",
+                              replacement = " ",
+                              name)) %>%
+    dplyr::select(type, type_level = name, prop = value)
+  
+  return(type_props)
+}
+
+type_props <- get_two_type_props(type_data)
+type_props_no_na <- get_two_type_props(type_data_no_na)
+```
+
+```{r plot-type-1}
+ggplot2::ggplot(data = type_data,
+                mapping = ggplot2::aes(x = type1)) +
+  ggplot2::geom_bar(stat = "count") +
+  ggplot2::theme(axis.text.x = 
+                  ggplot2::element_text(angle = 45))
+```
+
+```{r plot-type-2}
+ggplot2::ggplot(data = type_data,
+                mapping = ggplot2::aes(x = type2)) +
+  ggplot2::geom_bar(stat = "count") +
+  ggplot2::theme(axis.text.x = 
+                  ggplot2::element_text(angle = 45))
+```
+```{r create-palete}
+pokepal <- 
+  c("bug_type 1" = "olivedrab", 
+    "bug_type 2" = "olivedrab1",
+    "dark_type 1" = "gray0", 
+    "dark_type 2" = "gray",
+    "dragon_type 1" = "darkslategray", 
+    "dragon_type 2" = "darkslategray1")
+```
+
+
+```{r plot-types-side-by-side}
+ggplot2::ggplot(data = type_props,
+                mapping = 
+                  ggplot2::aes(x = type,
+                               y = prop,
+                               group = type_level,
+                               fill = type)) + 
+  ggplot2::geom_bar(stat = "identity",
+                    position = ggplot2::position_dodge())+
+  ggplot2::theme(axis.text.x = 
+                  ggplot2::element_text(angle = 45))
+```
+
+```{r plot-types-side-by-side-no-na}
+ggplot2::ggplot(data = type_props_no_na,
+                mapping = 
+                  ggplot2::aes(x = type,
+                               y = prop,
+                               group = type_level,
+                               fill = type)) + 
+  ggplot2::geom_bar(stat = "identity",
+                    position = ggplot2::position_dodge())+
+  ggplot2::theme(axis.text.x = 
+                  ggplot2::element_text(angle = 45))
+```
+
+```{r a-little-color-pal-test}
+## TODO: remove filtering below since it was 
+## just for testing
+ggplot2::ggplot(data = 
+                  type_props_no_na %>%
+                  dplyr::filter(type %in% 
+                                  c("bug", "dark", "dragon")) %>%
+                  dplyr::mutate(type_and_level = 
+                                  paste0(type, "_", type_level)),
+                mapping = 
+                  ggplot2::aes(x = type_and_level,
+                               y = prop,
+                               group = type_and_level,
+                               fill = type_and_level)) + 
+  ggplot2::geom_bar(stat = "identity",
+                    position = ggplot2::position_dodge())+
+  ggplot2::scale_fill_manual(values = pokepal) +
+  ggplot2::theme(axis.text.x = 
+                  ggplot2::element_text(angle = 45))
+```
