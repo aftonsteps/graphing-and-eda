@@ -1,0 +1,61 @@
+---
+title =  "sub_badges"
+author =  "Afton Coombs"
+date =  "1/13/2021"
+output =  html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(magrittr)
+```
+
+## Intro
+<intro will go here>
+
+## Palettes
+```{r make-palette}
+bold_pal <-
+  c("Dark Slate Blue" = "#54478c",
+    "Sapphire Blue" = "#2c699a",
+    "Blue Munsell" = "#048ba8",
+    "Keppel" = "#0db39e",
+    "Medium Aquamarine" = "#16db93",
+    "Light Green" = "#83e377",
+    "Inchworm" = "#b9e769",
+    "Corn" = "#efea5a",
+    "Maize Crayola" = "#f1c453",
+    "Sandy Brown" = "#f29e4c")
+
+pastel_pal <-
+  c("Light Pink" = "#ffadad",
+    "Deep Champagne" = "#ffd6a5",
+    "Lemon Yellow Crayola" = "#fdffb6",
+    "Tea Green" = "#caffbf",
+    "Celeste" = "#9bf6ff",
+    "Baby Blue Eyes" = "#a0c4ff",
+    "Maximum Blue Purple" = "#bdb2ff",
+    "Mauve" = "#ffc6ff",
+    "Baby Powder" = "#fffffc")
+
+shades::swatch(pastel_pal)
+shades::swatch(bold_pal)
+```
+
+## General Sub Badge
+```{r general-sub-badge}
+set.seed(10)
+general_sub_data <-
+  data.frame(x = seq(1:20))
+general_sub_data$y <- 
+  general_sub_data$x + 
+  runif(n = length(general_sub_data$x),
+        max = 5)
+
+
+ggplot2::ggplot(data = general_sub_data,
+                mapping = ggplot2::aes(x = x, 
+                                       y = y)) +
+  ggplot2::geom_line(color = bold_pal[["Sapphire Blue"]]) +
+  ggplot2::theme_classic()
+```
