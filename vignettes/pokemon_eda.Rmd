@@ -126,15 +126,57 @@ ggplot2::ggplot(data = type_data,
                   ggplot2::element_text(angle = 45))
 ```
 ```{r create-palete}
+convert_to_6_digit_hex <- function(hex) {
+  keep_names <- names(hex)
+  hex <- paste0("#",
+                substr(hex, 2, 2), 
+                substr(hex, 2, 2), 
+                substr(hex, 3, 3),
+                substr(hex, 3, 3),
+                substr(hex, 4, 4),
+                substr(hex, 4, 4))
+  names(hex) <- keep_names
+  
+  return(hex)
+}
+
+## These hex codes were copied from the pokemon type icons
+## on this website: https://pokemondb.net/
 pokepal <- 
-  c("bug_type 1" = "olivedrab", 
-    "bug_type 2" = "olivedrab1",
-    "dark_type 1" = "gray0", 
-    "dark_type 2" = "gray",
-    "dragon_type 1" = "darkslategray", 
-    "dragon_type 2" = "darkslategray1")
+  c("normal type 1" = "#aa9",
+    "fire type 1" = "#f42",
+    "water type 1" = "#39f",
+    "electric type 1" = "#fc3",
+    "grass type 1" = "#7c5",
+    "ice type 1" = "#6cf",
+    "fighting type 1" = "#b54",
+    "poison type 1" = "#a59",
+    "ground type 1" = "#db5",
+    "flying type 1" = "#89f",
+    "psychic type 1" = "#f59",
+    "bug type 1" = "#ab2",
+    "rock type 1" = "#ba6",
+    "ghost type 1" = "#66b",
+    "dragon type 1" = "#76e",
+    "dark type 1" = "#754",
+    "steel type 1" = "#aab",
+    "fairy type 1" = "#e9e") %>%
+  convert_to_6_digit_hex()
+
+shades::swatch(pokepal)
 ```
 
+```{r create-second-palette}
+pokepal_2 <- 
+  pokepal %>%
+  shades::opacity(0.5)
+
+shades::swatch(pokepal_2)
+names(pokepal_2) <- 
+  gsub(pattern = "1", replacement = "2", x = names(pokepal))
+
+pokepal <- c(pokepal, pokepal_2)
+```
 
 ```{r plot-types-side-by-side}
 ggplot2::ggplot(data = type_props,
@@ -148,37 +190,29 @@ ggplot2::ggplot(data = type_props,
   ggplot2::theme(axis.text.x = 
                   ggplot2::element_text(angle = 45))
 ```
+```{r show-colors-for-reference}
+shades::swatch(pokepal)
+```
 
 ```{r plot-types-side-by-side-no-na}
+type_props_no_na <-
+  type_props_no_na %>%
+  dplyr::mutate(pal = paste0(type, " ", type_level))
+
 ggplot2::ggplot(data = type_props_no_na,
                 mapping = 
                   ggplot2::aes(x = type,
                                y = prop,
-                               group = type_level,
-                               fill = type)) + 
-  ggplot2::geom_bar(stat = "identity",
-                    position = ggplot2::position_dodge())+
-  ggplot2::theme(axis.text.x = 
-                  ggplot2::element_text(angle = 45))
-```
-
-```{r a-little-color-pal-test}
-## TODO: remove filtering below since it was 
-## just for testing
-ggplot2::ggplot(data = 
-                  type_props_no_na %>%
-                  dplyr::filter(type %in% 
-                                  c("bug", "dark", "dragon")) %>%
-                  dplyr::mutate(type_and_level = 
-                                  paste0(type, "_", type_level)),
-                mapping = 
-                  ggplot2::aes(x = type_and_level,
-                               y = prop,
-                               group = type_and_level,
-                               fill = type_and_level)) + 
+                               group = pal,
+                               fill = pal)) + 
   ggplot2::geom_bar(stat = "identity",
                     position = ggplot2::position_dodge())+
   ggplot2::scale_fill_manual(values = pokepal) +
+  ggplot2::labs(x = "Type", 
+                y = "Proportion",
+                title = "Pokemon Type Proportions") +
+  ggplot2::theme_classic() +
   ggplot2::theme(axis.text.x = 
-                  ggplot2::element_text(angle = 45))
+                  ggplot2::element_text(angle = 45,
+                                        size = 6))
 ```
