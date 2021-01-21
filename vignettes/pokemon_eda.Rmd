@@ -216,3 +216,48 @@ ggplot2::ggplot(data = type_props_no_na,
                   ggplot2::element_text(angle = 45,
                                         size = 6))
 ```
+```{r get-most-rare-pokemon}
+most_rare <- sort(table(c(pokedata$type1, pokedata$type2)))
+```
+
+```{r plot-heat-map-log}
+type_data_no_na_for_heat <-
+  table(type_data_no_na$type1, 
+        type_data_no_na$type2,
+        useNA = "always") %>%
+  as.data.frame() %>%
+  dplyr::filter(!is.na(Var1))
+
+ggplot2::ggplot(data = type_data_no_na_for_heat,
+                mapping = ggplot2::aes(x = Var1,
+                                       y = Var2,
+                                       fill = log(Freq))) +
+  ggplot2::geom_tile()
+```
+
+```{r plot-heat-map-log, options}
+ggplot2::ggplot(data = 
+                  type_data_no_na_for_heat %>%
+                  dplyr::filter(!is.na(Var1) & !is.na(Var2)),
+                mapping = ggplot2::aes(x = Var1,
+                                       y = Var2,
+                                       fill = Freq)) +
+  ggplot2::geom_tile() +
+  ggplot2::labs(x = "Type 1", y = "Type 2") +
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90)) 
+```
+
+```{r plot-heat-map-log, options}
+ggplot2::ggplot(data = 
+                  type_data_no_na_for_heat %>%
+                  dplyr::filter(!is.na(Var1) & !is.na(Var2)) %>% 
+                  dplyr::mutate(Freq = ifelse(test = Freq == 0,
+                                              yes = NA,
+                                              no = Freq)),
+                mapping = ggplot2::aes(x = Var1,
+                                       y = Var2,
+                                       fill = Freq)) +
+  ggplot2::geom_tile() +
+  ggplot2::labs(x = "Type 1", y = "Type 2") +
+  ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90))
+```
