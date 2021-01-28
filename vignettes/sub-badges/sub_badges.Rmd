@@ -56,6 +56,28 @@ general_sub_data$y <-
 ggplot2::ggplot(data = general_sub_data,
                 mapping = ggplot2::aes(x = x, 
                                        y = y)) +
-  ggplot2::geom_line(color = bold_pal[["Sapphire Blue"]]) +
-  ggplot2::theme_classic()
+  ggplot2::geom_line(color = bold_pal[["Sapphire Blue"]],
+                     size = 10) +
+  ggplot2::geom_text(mapping = ggplot2::aes(x = 10,
+                                            y = 14,
+                                            label = ("1")),
+                     size = 120) +
+  ggplot2::theme_classic() +
+  ggplot2::theme(axis.text = ggplot2::element_blank(),
+                 axis.title = ggplot2::element_blank(),
+                 axis.line = ggplot2::element_line(size = 5),
+                 panel.background = 
+                   ggplot2::element_rect(fill = pastel_pal[["Baby Powder"]]))
+```
+
+# Two Month Sub Badge
+```{r two-month, options}
+set.seed(10)
+two_month_sub_data <-
+  data.frame(x = rep(seq(1:20), 3),
+             type = c(rep(1, 20), rep(2, 20), rep(3, 20)))
+two_month_sub_data$y <- 
+  two_month_sub_data$x + 
+  runif(n = length(two_month_sub_data$x),
+        max = 5)
 ```

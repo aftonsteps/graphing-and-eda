@@ -47,8 +47,19 @@ unprofanify <- function(x) {
 }
 
 ## TODO get, unlist, clean, and save these
-biden <- rtweet::search_tweets("biden", n = 18000, include_rts = FALSE)
-harris <- rtweet::search_tweets("harris", n = 18000, include_rts = FALSE)
-inaug <- rtweet::search_tweets("inauguration", n = 18000, include_rts = FALSE)
-pres <- rtweet::search_tweets("president", n = 18000, include_rts = FALSE)
+rstudio <-
+  rtweet::search_tweets("#rstudioglobal", n = 18000, include_rts = FALSE, retryonratelimit = TRUE)
+biden <-
+  rtweet::search_tweets("biden", n = 18000, include_rts = FALSE, retryonratelimit = TRUE)
+harris <-
+  rtweet::search_tweets("harris", n = 18000, include_rts = FALSE, retryonratelimit = TRUE)
+inaug <-
 
+  rtweet::search_tweets("inauguration", n = 18000, include_rts = FALSE, retryonratelimit = TRUE)
+pres <-
+  rtweet::search_tweets("president", n = 18000, include_rts = FALSE, retryonratelimit = TRUE)
+a_gorman <-
+  rtweet::search_tweets("amanda gorman", n = 18000, include_rts = FALSE, retryonratelimit = TRUE)
+
+
+save(rstudio, biden, harris, inaug, pres, a_gorman, file = "data-raw/inaug2021/twitter_data.Rdata")
