@@ -162,3 +162,34 @@ ggplot2::ggplot(data = nine_month_data,
                  axis.title = ggplot2::element_blank(),
                  axis.line = ggplot2::element_line(size = 5))
 ```
+
+```{r one-year-option2}
+t <- pracma::deg2rad(seq(0, 360, by = 2))
+pracma::polar(t, 
+              cos(2*t), 
+              bxcol = "white", 
+              col = pastel_pal[["Light Pink"]], 
+              main = "Sine and Cosine")
+pracma::polar(t, sin(2*t), col = pastel_pal[["Light Pink"]], add = TRUE) 
+```
+
+```{r one-year-opt-3}
+pie <- 
+  ggplot2::ggplot(data = mtcars, 
+                  mapping = ggplot2::aes(x = factor(1), 
+                                         fill = factor(cyl))) +
+  ggplot2::geom_bar(width = 1)+
+  ggplot2::coord_polar(theta = "y") +
+  ggplot2::scale_fill_manual(values = 
+                               c(bold_pal[["Blue Munsell"]],
+                                 pastel_pal[["Celeste"]],
+                                 pastel_pal[["Baby Blue Eyes"]]))
+  ggplot2::theme_minimal() +
+  ggplot2::theme(legend.position = "none",
+                 axis.text = ggplot2::element_blank(),
+                 axis.ticks = ggplot2::element_blank(),
+                 axis.title = ggplot2::element_blank(),
+                 axis.line = ggplot2::element_line(size = 5))
+
+pie
+```
