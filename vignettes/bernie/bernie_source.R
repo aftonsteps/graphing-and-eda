@@ -15,4 +15,7 @@ save(bernie_7_days, bernie_mittens_7_days, mittens_7_days,
 ## Retrieved at approx. 2021-01-27 21:55:44 PST
 bernie_over_time <-
   gtrendsR::gtrends(keyword = "bernie", time = "all")
-save(bernie_over_time, file = "vignettes/bernie/long_term_bernie_data.Rdata")
+bernie_over_time_us <-
+  gtrendsR::gtrends(keyword = "bernie", geo = "US", time = "all")
+save(bernie_over_time, bernie_over_time_us,
+     file = "vignettes/bernie/long_term_bernie_data.Rdata")
