@@ -194,7 +194,7 @@ rf_fit <-
         as.numeric(date) +
         month + 
         non_dem_incumb_elect_period,
-      data = bernie_hist)
+      data = train)
 
 rf_fit_rs %>% tune::collect_metrics()
 ```
