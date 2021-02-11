@@ -1,0 +1,87 @@
+---
+title: "Vehicle Diagnostics"
+author: "Afton Coombs"
+date: "2/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Background info on the data
+
+- Diagnostic data from Toyota Celica taken with on-board diagnostic tool
+
+From @EntropicUniverse:
+- Each csv file is a run of n-time
+- Each has a col for a sensor in the car
+- The car being tested had airflow problems or MassAirFlow out of range readings
+
+
+```{r load-data, options}
+filepath <- "OBD II Diagnostics data/2000 Toyota Celica Diagnostics/csv/"
+files <- list.files(filepath)[grepl("^2000Toyota", list.files(filepath))]
+raw_datasets <- 
+  lapply(X = paste0(filepath, files), FUN = read.csv, stringsAsFactors = FALSE)
+```
+
+```{r data-cleaning-and-reduction}
+clean_data <- function(x) {
+  x <-
+    x %>% 
+    dplyr::select(Time, 
+                  dplyr::contains("Air.Temperature"),
+                  dplyr::contains("Air.Flow"),
+                  dplyr::contains("Vehicle.Speed"),
+                  dplyr::contains("Engine.RPM"),
+                  dplyr::contains("Fuel.consumption"))
+  
+  colnames(x) <- 
+    c("time",
+      "air_temp", 
+      "air_flow", 
+      "vehicle_speed", 
+      "engine_rpm", 
+      "fuel_consumption")
+  
+  return(x)
+}
+
+add_id_col <- function(x_list) {
+  for (idx in 1:length(x_list)) {
+    x_list[[idx]]$id <- idx
+  }
+  
+  return(x_list)
+}
+
+datasets <- 
+  raw_datasets %>%
+  purrr::map(~clean_data(.x)) %>%
+  purrr::map(~tidyr::pivot_longer(.x, cols = !dplyr::contains("time"))) %>%
+  purrr::map(~dplyr::mutate(.x, 
+                            time = as.POSIXct(time, 
+                                              "%H:%M:%OS", 
+                                              tz = Sys.timezone()))) %>%
+  purrr::map(~dplyr::mutate(.x, 
+                            anchored_time = time - min(time, na.rm = TRUE))) %>%
+  add_id_col() %>%
+  purrr::reduce(dplyr::full_join, 
+                by = c("time", "anchored_time", "name", "value", "id"))
+```
+
+```{r first-plot}
+ggplot2::ggplot(data = datasets,
+                mapping = ggplot2::aes(x = anchored_time,
+                                       y = value,
+                                       group = factor(id),
+                                       color = factor(id),
+                                       fill = factor(id))) +
+  ggplot2::geom_point() +
+  ggplot2::geom_line() +
+  ggplot2::facet_wrap(facets = ggplot2::vars(datasets$name), scales = "free_y") +
+  ggplot2::theme(legend.title = ggplot2::element_blank())
+```
+
+
