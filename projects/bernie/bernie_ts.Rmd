@@ -27,6 +27,7 @@ mean(bernie_over_time_us$interest_over_time$hits)
 var(bernie_over_time_us$interest_over_time$hits)
 sd(bernie_over_time_us$interest_over_time$hits)
 ```
+
 ```{r make-bernie-a-time-series}
 bernie_ts <-
   ts(data = bernie_over_time_us$interest_over_time$hits,
