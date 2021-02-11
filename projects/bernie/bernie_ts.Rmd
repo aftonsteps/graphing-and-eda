@@ -1,0 +1,254 @@
+---
+title: "Bernie Time Series?"
+author: "Afton Coombs"
+date: "2/3/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(magrittr)
+```
+
+## Bernie Time Series?
+Can we predict Google Trend hits for "Bernie" using a time series model?
+
+```{r load-data}
+load("long_term_bernie_data.Rdata")
+```
+
+```{r label, options}
+plot(bernie_over_time)
+plot(bernie_over_time_us)
+```
+
+```{r explore}
+mean(bernie_over_time_us$interest_over_time$hits)
+var(bernie_over_time_us$interest_over_time$hits)
+sd(bernie_over_time_us$interest_over_time$hits)
+```
+```{r make-bernie-a-time-series}
+bernie_ts <-
+  ts(data = bernie_over_time_us$interest_over_time$hits,
+     frequency = 12,
+     start = c(2004, 1))
+```
+
+```{r initial-stl}
+bernie_ts %>%
+  stl(s.window = "periodic") %>%
+  forecast::seasadj() %>%
+  ggplot2::autoplot()
+```
+
+```{r do-we-transform}
+bernie_ts %>%
+  forecast::BoxCox.lambda()
+adj_bernie_ts <-
+  bernie_ts %>%
+  forecast::BoxCox(lambda = "auto") %>%
+  stl(s.window = "periodic") %>%
+  forecast::seasadj()
+ggplot2::autoplot(adj_bernie_ts)
+```
+
+```{r explore-differencing}
+adj_bernie_ts %>% forecast::ggtsdisplay(main = "")
+```
+
+```{r explore-differencing}
+bernie_ts %>%
+  stl(s.window = "periodic") %>%
+  forecast::seasadj() %>%
+  diff() %>%
+  forecast::ggtsdisplay(main = "")
+```
+
+```{r box-test}
+## Test if our distribution is significantly different from white noise
+Box.test(diff(adj_bernie_ts), lag = 10, type = "Ljung-Box")
+```
+
+```{r box-test-untransformed}
+## Test if our distribution is significantly different from white noise
+Box.test(diff(bernie_ts %>% 
+                stl(s.window = "periodic") %>% 
+                forecast::seasadj()), 
+         lag = 10, 
+         type = "Ljung-Box")
+```
+
+Conclusion: Time series e.g. TSLM or ARIMA models don't seem like a good option. :(
+
+## What About A Simple Linear Model?
+```{r explore-lm-no-additional-preds}
+bernie_hist <-
+  bernie_over_time_us$interest_over_time %>%
+  dplyr::mutate(hits_log_10 = log10(hits)) %>%
+  dplyr::mutate(date = as.Date(date)) %>%
+  dplyr::mutate(year = lubridate::year(date),
+                month = lubridate::month(date)) %>%
+  dplyr::mutate(month = factor(month, ordered = FALSE)) %>%
+  dplyr::mutate(non_dem_incumb_elect_period = 
+                  as.numeric(year %in% c(2020, 2016, 2008) |
+                               (year %in% c(2021, 2017, 2009) & month == 1)))
+
+ggplot2::ggplot(data = bernie_hist,
+                mapping = ggplot2::aes(x = date,
+                                       y = hits,
+                                       color = non_dem_incumb_elect_period)) +
+  ggplot2::geom_point() +
+  ggplot2::geom_line() +
+  ggplot2::geom_smooth(method = "lm") +
+  ggplot2::theme(legend.position = "none")
+```
+
+```{r explore-lm-no-additional-preds-log10}
+ggplot2::ggplot(data = bernie_hist,
+                mapping = ggplot2::aes(x = date,
+                                       y = hits_log_10,
+                                       color = non_dem_incumb_elect_period)) +
+  ggplot2::geom_point() +
+  ggplot2::geom_line() +
+  ggplot2::geom_smooth(method = "lm") +
+  ggplot2::theme(legend.position = "none")
+```
+
+```{r set-up-training-and-test-data}
+set.seed(500)
+split <- 
+  rsample::initial_split(bernie_hist,
+                         strata = non_dem_incumb_elect_period)
+train <- rsample::training(split)
+test <- rsample::testing(split)
+folds <- rsample::vfold_cv(train, v = 10)
+```
+
+```{r build-lm}
+lm_mod <- 
+  parsnip::linear_reg() %>%
+  parsnip::set_engine("lm")
+
+lm_wf <- 
+  workflows::workflow() %>%
+  workflows::add_model(lm_mod) %>%
+  workflows::add_formula(hits_log_10 ~ non_dem_incumb_elect_period + date)
+
+lm_fit_rs <-
+  lm_wf %>%
+  tune::fit_resamples(folds)
+
+lm_fit <-
+  lm_mod %>%
+  fit(hits_log_10 ~ non_dem_incumb_elect_period + date, data = train)
+
+lm_fit_rs %>% tune::collect_metrics()
+```
+
+```{r run-on-test-set, options}
+lm_training_pred <-
+  predict(lm_fit, train) %>%
+  dplyr::bind_cols(train %>% select(hits_log_10)) %>%
+  dplyr::mutate(.pred_rescaled = 10^.pred, hits = 10^hits_log_10) 
+
+lm_training_pred %>%
+  yardstick::rmse(truth = hits, estimate = .pred_rescaled)
+
+lm_training_pred %>%
+  yardstick::mape(truth = hits, estimate = .pred_rescaled)
+
+lm_testing_pred <-
+  predict(lm_fit, test) %>%
+  dplyr::bind_cols(test %>% select(hits_log_10)) %>%
+  dplyr::mutate(.pred_rescaled = 10^.pred, hits = 10^hits_log_10)
+
+lm_testing_pred %>%
+  yardstick::rmse(truth = hits, estimate = .pred_rescaled)
+
+lm_testing_pred %>%
+  yardstick::mape(truth = hits, estimate = .pred_rescaled)
+```
+
+## Random Forest
+```{r build-rf}
+rf_mod <- 
+  parsnip::boost_tree(trees = 1000) %>%
+  parsnip::set_engine("xgboost") %>%
+  parsnip::set_mode("regression")
+
+rf_wf <- 
+  workflows::workflow() %>%
+  workflows::add_model(rf_mod) %>%
+  workflows::add_formula(hits ~ 
+                           as.numeric(date) +
+                           month + 
+                           non_dem_incumb_elect_period)
+
+rf_fit_rs <-
+  rf_wf %>%
+  tune::fit_resamples(folds)
+
+rf_fit <-
+  rf_mod %>%
+  fit(hits ~ 
+        as.numeric(date) +
+        month + 
+        non_dem_incumb_elect_period,
+      data = train)
+
+rf_fit_rs %>% tune::collect_metrics()
+```
+
+```{r build-rf}
+rf_training_pred <-
+  predict(rf_fit, train) %>%
+  dplyr::bind_cols(train %>% dplyr::select(hits))
+
+rf_training_pred %>%
+  yardstick::rmse(truth = hits, estimate = .pred)
+
+rf_training_pred %>%
+  yardstick::mape(truth = hits, estimate = .pred)
+
+rf_testing_pred <-
+  predict(rf_fit, test) %>%
+  dplyr::bind_cols(test %>% select(hits))
+
+rf_testing_pred %>%
+  yardstick::rmse(truth = hits, estimate = .pred)
+
+rf_testing_pred %>%
+  yardstick::mape(truth = hits, estimate = .pred)
+```
+
+```{r plot-actuals-vs-preds}
+rf_for_plotting <-
+  rf_testing_pred %>%
+  dplyr::bind_cols(test %>% dplyr::select(date)) %>%
+  tidyr::pivot_longer(cols = c(.pred, hits))
+
+ggplot2::ggplot(data = rf_for_plotting,
+                mapping = ggplot2::aes(x = date ,
+                                       y = value,
+                                       color = name,
+                                       group = name)) +
+  ggplot2::geom_point() +
+  ggplot2::geom_line() +
+  ggplot2::facet_wrap(facets = vars(name))
+```
+
+```{r plot-actuals-vs-preds-together}
+rf_for_plotting <-
+  rf_testing_pred %>%
+  dplyr::bind_cols(test %>% dplyr::select(date)) %>%
+  tidyr::pivot_longer(cols = c(.pred, hits))
+
+ggplot2::ggplot(data = rf_for_plotting,
+                mapping = ggplot2::aes(x = date ,
+                                       y = value,
+                                       color = name,
+                                       group = name)) +
+  ggplot2::geom_point() +
+  ggplot2::geom_line()
+```
+

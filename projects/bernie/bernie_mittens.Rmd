@@ -1,0 +1,62 @@
+---
+title: "Bernie Mittens"
+author: "Afton Coombs"
+date: "1/27/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Bernie Mittens
+
+We're going to track searches for "Bernie mittens" on Google Trends!
+
+```{r load-data}
+## Find data sourcing and saving in bernie_source.R
+load("bernie_data.Rdata")
+```
+
+```{r plot-just-bernie}
+bernie_data <- bernie_7_days$interest_over_time
+ggplot2::ggplot(data = bernie_data,
+                mapping = ggplot2::aes(x = date, y = hits)) +
+  ggplot2::geom_line() +
+  ggplot2::labs(title = "Bernie on Google Trends") +
+  ggplot2::theme_classic()
+```
+
+```{r plot-just-bernie-mittens}
+bernie_mittens_data <- bernie_mittens_7_days$interest_over_time
+ggplot2::ggplot(data = bernie_mittens_data,
+                mapping = ggplot2::aes(x = date, y = hits)) +
+  ggplot2::geom_line() +
+  ggplot2::labs(title = "Bernie Mittens on Google Trends") +
+  ggplot2::theme_classic()
+```
+
+```{r make-a-bernie-plot}
+ggplot2::ggplot(data = bernie_data,
+                mapping = ggplot2::aes(x = date, y = hits)) +
+  ggplot2::geom_line(color = "red") +
+  ggbernie::geom_bernie(bernie = "stand", size = 0.5) +
+  ggplot2::labs(title = "Bernie on Google Trends") +
+  ggplot2::theme_classic()
+```
+
+```{r make-a-bernie-mittens-plot}
+ggplot2::ggplot(data = bernie_mittens_data,
+                mapping = ggplot2::aes(x = date, y = hits)) +
+  ggplot2::geom_line(color = "blue") +
+  ggbernie::geom_bernie(bernie = "sitting", size = 0.5) +
+  ggplot2::labs(title = "Bernie Mittens on Google Trends") +
+  ggplot2::theme_classic()
+```
+
+```{r load-long-term-bernie-data, options}
+load("long_term_bernie_data.Rdata")
+ggplot2::ggplot(data = bernie_over_time$interest_over_time,
+                mapping = ggplot2::aes(x = date, y = hits)) +
+  ggplot2::geom_line()
+```
