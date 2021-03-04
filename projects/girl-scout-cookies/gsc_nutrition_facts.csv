@@ -10,21 +10,34 @@ Toast Yay,Total Sugars,10g
 Toast Yay,Protein,1g
 Toast Yay,Vitamin D,0mcg
 Toast Yay,Calcium,0mcg
-Toast Yay,Iron,1 mg
-Toast Yay,Potassium,0 mg
-Thin Mints,Total Fat,7g
-Thin Mints,Saturated Fat,5g
-Thin Mints,Trans Fat,0g
-Thin Mints,Cholesterol,9mg
-Thin Mints,Sodium,12mg
-Thin Mints,Total Carbohydrate,21g
-Thin Mints,Dietary Fiber,1g
-Thin Mints,Total Sugars,10g
-Thin Mints,Protein,2g
-Thin Mints,Vitamin D,0mcg
-Thin Mints,Calcium,10mcg
-Thin Mints,Iron,1.2mg
-Thin Mints,Potassium,40mg
+Toast Yay,Iron,1mg
+Toast Yay,Potassium,0mg
+Thin Mints (ABC Baker),Total Fat,7g
+Thin Mints (ABC Baker),Saturated Fat,5g
+Thin Mints (ABC Baker),Trans Fat,0g
+Thin Mints (ABC Baker),Cholesterol,0mg
+Thin Mints (ABC Baker),Sodium,105mg
+Thin Mints (ABC Baker),Total Carbohydrate,22g
+Thin Mints (ABC Baker),Dietary Fiber,1g
+Thin Mints (ABC Baker),Total Sugars,10g
+Thin Mints (ABC Baker),Protein,1g
+Thin Mints (ABC Baker),Vitamin D,0mcg
+Thin Mints (ABC Baker),Calcium,10mcg
+Thin Mints (ABC Baker),Iron,1.6mg
+Thin Mints (ABC Baker),Potassium,0mg
+Thin Mints (Little Brownie Baker),Total Fat,7g
+Thin Mints (Little Brownie Baker),Saturated Fat,5g
+Thin Mints (Little Brownie Baker),Trans Fat,0g
+Thin Mints (Little Brownie Baker),Cholesterol,0mg
+Thin Mints (Little Brownie Baker),Sodium,120mg
+Thin Mints (Little Brownie Baker),Total Carbohydrate,21g
+Thin Mints (Little Brownie Baker),Dietary Fiber,1g
+Thin Mints (Little Brownie Baker),Total Sugars,10g
+Thin Mints (Little Brownie Baker),Protein,2g
+Thin Mints (Little Brownie Baker),Vitamin D,0mcg
+Thin Mints (Little Brownie Baker),Calcium,10mcg
+Thin Mints (Little Brownie Baker),Iron,1.2mg
+Thin Mints (Little Brownie Baker),Potassium,40mg
 Lemon-Ups,Total Fat,6g
 Lemon-Ups,Saturated Fat,2g
 Lemon-Ups,Trans Fat,0g
@@ -116,6 +129,19 @@ Caramel deLites,Vitamin D,0mcg
 Caramel deLites,Calcium,0mg
 Caramel deLites,Iron,0.7mg
 Caramel deLites,Potassium,0mg
+Samoas,Total Fat,8g
+Samoas,Saturated Fat,6g
+Samoas,Trans Fat,0g
+Samoas,Cholesterol,0mg
+Samoas,Sodium,60mg
+Samoas,Total Carbohydrate,18g
+Samoas,Dietary Fiber,9g
+Samoas,Total Sugars,11g
+Samoas,Protein,1g
+Samoas,Vitamin D,0mcg
+Samoas,Calcium,0mg
+Samoas,Iron,0.6mg
+Samoas,Potassium,45mg
 Girl Scout S'mores,Total Fat,7g
 Girl Scout S'mores,Saturated Fat,3.5g
 Girl Scout S'mores,Trans Fat,0mg
@@ -142,3 +168,30 @@ Chocolate-Covered Girl Scout S'mores,Vitamin D,0mcg
 Chocolate-Covered Girl Scout S'mores,Calcium,0mg
 Chocolate-Covered Girl Scout S'mores,Iron,1.1mg
 Chocolate-Covered Girl Scout S'mores,Potassium,0mg
+Peanut Butter Patties,,7g
+Peanut Butter Patties,Total Fat,4g
+Peanut Butter Patties,Saturated Fat,0g
+Peanut Butter Patties,Trans Fat,0mg
+Peanut Butter Patties,Cholesterol,0mg
+Peanut Butter Patties,Sodium,90mg
+Peanut Butter Patties,Total Carbohydrate,15g
+Peanut Butter Patties,Dietary Fiber,1g
+Peanut Butter Patties,Total Sugars,8g
+Peanut Butter Patties,Protein,2g
+Peanut Butter Patties,Vitamin D,0mcg
+Peanut Butter Patties,Calcium,0mg
+Peanut Butter Patties,Iron,0.8mg
+Peanut Butter Patties,Potassium,0mg
+Peanut Butter Sandwich,Total Fat,7g
+Peanut Butter Sandwich,Saturated Fat,2g
+Peanut Butter Sandwich,Trans Fat,0g
+Peanut Butter Sandwich,Cholesterol,0mg
+Peanut Butter Sandwich,Sodium,105mg
+Peanut Butter Sandwich,Total Carbohydrate,21g
+Peanut Butter Sandwich,Dietary Fiber,1g
+Peanut Butter Sandwich,Total Sugars,8g
+Peanut Butter Sandwich,Protein,3g
+Peanut Butter Sandwich,Vitamin D,0mcg
+Peanut Butter Sandwich,Calcium,0mg
+Peanut Butter Sandwich,Iron,1.2mg
+Peanut Butter Sandwich,Potassium,0mg
