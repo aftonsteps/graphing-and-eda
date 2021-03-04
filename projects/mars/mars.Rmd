@@ -1,0 +1,124 @@
+---
+title: "Mars!"
+author: "Afton Coombs"
+date: "3/3/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(magrittr)
+```
+
+```{r load-data}
+jezero_tif <- raster::raster("jezero.tif")
+jezero_mat <- rayshader::raster_to_matrix(jezero_tif)
+```
+
+```{r label, options}
+jezero_mat_2 <-
+  jezero_mat %>%
+  rayshader::sphere_shade(texture = "desert") %>%
+  rayshader::add_shadow(rayshader::ray_shade(jezero_mat,
+                                             sunaltitude = 3,
+                                             zscale = 33,
+                                             lambert = FALSE),
+                        max_darken = 0.5) %>%
+  rayshader::add_shadow(rayshader::lamb_shade(jezero_mat,
+                                              sunaltitude = 3,
+                                              zscale = 33))
+rayshader::plot_map(jezero_mat_2)
+```
+
+```{r three-d-graph}
+jezero_mat %>%
+  rayshader::sphere_shade(texture = "desert") %>%
+    rayshader::add_shadow(rayshader::ray_shade(jezero_mat,
+                                             sunaltitude = 3,
+                                             zscale = 33,
+                                             lambert = FALSE),
+                        max_darken = 0.5) %>%
+  rayshader::add_shadow(rayshader::lamb_shade(jezero_mat,
+                                              sunaltitude = 3,
+                                              zscale = 33),
+                        max_darken = 0.7) %>%
+  rayshader::plot_3d(jezero_mat,
+                     zscale = 7.5,
+                     windowsize = c(2560, 1440),
+                     background = "grey30",
+                     shadowcolor = "grey5")
+
+rayshader::render_camera(fov = 10, theta = 20, zoom = 0.7, phi = 40)  
+```
+
+```{r label}
+cat_tiff <- raster::raster("cat_sketch_small.tif")
+cat_mat <- rayshader::raster_to_matrix(cat_tiff)
+cat_mat_2 <- cat_mat - 2700
+cat_mat_2 %>%
+  rayshader::sphere_shade(texture = "desert") %>%
+  rayshader::add_shadow(rayshader::ray_shade(cat_mat_2, zscale = 20)) %>%
+  rayshader::plot_3d(cat_mat_2, zscale = 7.5)
+
+## If I wanted to 3d print... :D :D :D :D 
+# rayshader::save_3dprint("cat_3d.stl", maxwidth = 250, unit = "mm")
+
+rayshader::render_camera(theta = 60, phi = 60, zoom = 0.85, fov = 30)
+```
+
+```{r edit-jezero}
+# cat_mat_3 <- cat_mat
+# cat_mat_3[cat_mat_3 < 255] <- cat_mat_3[cat_mat_3 < 255] - 100
+# cat_mat_3 <- cat_mat_3 - 2740
+cat_mat_4 <- cat_mat
+cat_mat_4[cat_mat_4 < 255] <- cat_mat_4[cat_mat_4] - 4000
+cat_mat_4[cat_mat_4 == 255] <- 0
+add_cols <- ncol(jezero_mat) - ncol(cat_mat) - 10
+add_row <- nrow(jezero_mat) - nrow(cat_mat) - 10
+empty_mat <- matrix(nrow = nrow(jezero_mat), ncol = ncol(jezero_mat))
+empty_mat[is.na(empty_mat)] <- 0
+empty_mat[add_row:(add_row + nrow(cat_mat) - 1), 
+          add_cols:(add_cols + ncol(cat_mat) - 1)] <- cat_mat_4
+
+jezero_mat_with_cat <-
+  jezero_mat + empty_mat
+
+jezero_mat_with_cat %>%
+  rayshader::sphere_shade(texture = "desert") %>%
+    rayshader::add_shadow(rayshader::ray_shade(jezero_mat,
+                                             sunaltitude = 3,
+                                             zscale = 33,
+                                             lambert = FALSE),
+                        max_darken = 0.5) %>%
+  rayshader::add_shadow(rayshader::lamb_shade(jezero_mat,
+                                              sunaltitude = 3,
+                                              zscale = 33),
+                        max_darken = 0.7) %>%
+  rayshader::plot_3d(jezero_mat,
+                     zscale = 7.5,
+                     windowsize = c(2560, 1440),
+                     background = "grey30",
+                     shadowcolor = "grey5")
+
+rayshader::render_camera(fov = 10, theta = 20, zoom = 0.7, phi = 40) 
+```
+
+```{r save-video}
+rayshader::render_movie(filename = "cats_on_mars.mp4", type = "orbit",
+                       phi = 40, theta = 0, frames = 1440, fps = 60)
+
+#Custom Orbit Movie 
+phivechalf = 30 + 60 * 1/(1 + exp(seq(-7, 20, length.out = 180)/2))
+phivecfull = c(rep("88.2", 30), phivechalf, rev(phivechalf))
+thetavec = c(rep("0", 30), 0 + 60 * sin(seq(0,359,length.out = 360) * pi/180))
+zoomvec = 0.25 + 0.4 * 1/(1 + exp(seq(-5, 20, length.out = 180)))
+zoomvecfull = c(rep("0.65", 30),zoomvec, rev(zoomvec))
+
+rayshader::render_movie(filename="MP4c1",
+                        type='custom',
+                        frames = 390,
+                        phi = phivecfull, 
+                        zoom = zoomvecfull, 
+                        theta = thetavec
+)
+```
