@@ -1,0 +1,192 @@
+---
+title: "Girl Scout Cookie"
+author: "Afton Coombs"
+date: "3/10/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Intro
+Which Girl Scout Cookie is the most nutritious? If you were to eat one cookie
+and only one for the whole day, which would bring you closes to the FDA 
+guidelines?
+
+```{r load-data}
+gsc <- readr::read_csv("gsc_nutrition_facts.csv")
+fda <- readr::read_csv("fda_guidelines.csv")
+gsc_colors <- readr::read_csv("cookie_box_colors.csv")
+```
+
+```{r fix-fda}
+fda <-
+  fda %>%
+  dplyr::mutate(Nutrient = ifelse(test = Nutrient == "Fat",
+                                  yes = "Total Fat",
+                                  no = Nutrient)) %>%
+  dplyr::mutate(Nutrient = ifelse(test = Nutrient == "Total carbohydrate",
+                                  yes = "Total Carbohydrate",
+                                  no = Nutrient)) %>%
+  dplyr::mutate(Nutrient = ifelse(test = Nutrient == "Saturated fat",
+                                  yes = "Saturated Fat",
+                                  no = Nutrient)) %>%
+  dplyr::mutate(Nutrient = ifelse(test = Nutrient == "Added sugars",
+                                  yes = "Total Sugars",
+                                  no = Nutrient)) %>%
+   dplyr::mutate(units_dv = gsub(pattern = "[0-9]",
+                                replacement = "",
+                                x = DV)) %>%
+  dplyr::mutate(DV = as.numeric(gsub(pattern = "[A-Za-z]",
+                                     replacement = "",
+                                     x = DV)))
+```
+
+```{r separate-the-units}
+fda_as_cookie <- 
+  fda %>%
+  dplyr::mutate(Name = "FDA Guidelines") %>%
+  dplyr::filter(Nutrient %in% gsc$Nutrient) %>%
+  dplyr::select(Name, Nutrient, Value = DV, units = units_dv)
+
+gsc_and_fda <- 
+  gsc %>%
+  dplyr::mutate(units = gsub(pattern = "[0-9]", 
+                             replacement = "", 
+                             x = Value)) %>%
+  dplyr::mutate(Value = as.numeric(gsub(pattern = "[A-Za-z]", 
+                                        replacement = "", 
+                                        x = Value))) %>%
+  dplyr::mutate(Value = ifelse(test = Nutrient == "Calcium",
+                               yes = Value / 100,
+                               no = Value),
+                units = ifelse(test = Nutrient == "Calcium",
+                               yes = "mg",
+                               units)) %>%
+  dplyr::full_join(fda_as_cookie, by = c("Name", "Nutrient", "Value", "units")) %>%
+  dplyr::inner_join(fda, by = "Nutrient") %>%
+  dplyr::mutate(units = gsub(pattern = "\\.",
+                             replacement = "",
+                             x = units)) %>%
+  dplyr::mutate(DV = as.numeric(DV)) %>%
+  dplyr::mutate(percentage_dv_for_10_cookies = 
+                  ifelse(test = Name != "FDA Guidelines",
+                         yes = Value * 10 / DV * 100,
+                         no = Value / DV * 100))
+```
+
+```{r pivot-cookies-wider}
+gsc_and_fda_wide <- 
+  gsc_and_fda %>%
+  dplyr::select(Name, Nutrient, percentage_dv_for_10_cookies) %>%
+  tidyr::pivot_wider(names_from = Nutrient,
+                     values_from = percentage_dv_for_10_cookies)
+```
+
+```{r get-gsc-colors}
+gsc_pal <- c(gsc_colors$Hex, "#006400")
+names(gsc_pal) <- c(gsc_colors$Name, "FDA Guidelines")
+shades::swatch(gsc_pal)
+```
+
+```{r make-everything-radar-chart}
+ggradar::ggradar(plot.data = gsc_and_fda_wide,
+                 values.radar = c("0%", 
+                                  "100%",
+                                  paste0(max(gsc_and_fda$percentage_dv_for_10_cookies),
+                                         "%")),
+                 grid.max = max(gsc_and_fda$percentage_dv_for_10_cookies),
+                 grid.min = 0,
+                 grid.mid = 100) +
+  ggplot2::scale_color_manual(values = gsc_pal)
+```
+
+```{r make-charting-function}
+make_cookie_comp_chart <- function(cookie_name, 
+                                   cookie_data = gsc_and_fda_wide, 
+                                   pal = gsc_pal) {
+  cookie_data <- 
+    cookie_data %>% 
+    dplyr::filter(Name %in% c(cookie_name, "FDA Guidelines"))
+  
+  g <- 
+    ggradar::ggradar(plot.data = cookie_data,
+                     values.radar = c("0%", 
+                                      "100%",
+                                      "450%"),
+                     grid.max = 450,
+                     grid.min = 0,
+                     grid.mid = 100,
+                     legend.position = "bottom",
+                     axis.label.size = 3,
+                     legend.text.size = 8,
+                     grid.label.size = 4,
+                     plot.extent.x.sf = 1.5, 
+                     plot.extent.y.sf = 1.5) +
+    ggplot2::scale_color_manual(values = pal)
+  
+  return(g)
+}
+
+```
+
+```{r chart-caramel-chocolate-chip}
+make_cookie_comp_chart(cookie_name = "Caramel Chocolate Chip")
+```
+
+```{r caramel-delites}
+make_cookie_comp_chart(cookie_name = "Caramel deLites")
+```
+
+```{r samoas}
+make_cookie_comp_chart(cookie_name = "Samoas")
+```
+
+```{r choco-smores}
+make_cookie_comp_chart(cookie_name = "Chocolate-Covered Girl Scout S'mores")
+```
+
+```{r regular-smores}
+make_cookie_comp_chart(cookie_name = "Girl Scout S'mores")
+```
+
+```{r lemon-ups}
+make_cookie_comp_chart(cookie_name = "Lemon-Ups")
+```
+
+```{r lemonades}
+make_cookie_comp_chart(cookie_name = "Lemonades")
+```
+
+```{r peanut-butter-patties}
+make_cookie_comp_chart(cookie_name = "Peanut Butter Patties")
+```
+
+```{r tagalongs}
+make_cookie_comp_chart(cookie_name = "Tagalongs")
+```
+
+```{r thin-mints-abc}
+make_cookie_comp_chart(cookie_name = "Thin Mints (ABC Baker)")
+```
+
+```{r thin-mints-brownie-baker}
+make_cookie_comp_chart(cookie_name = "Thin Mints (Little Brownie Baker)")
+```
+
+```{r toast-yay}
+make_cookie_comp_chart(cookie_name = "Toast Yay")
+```
+
+```{r do-si-dos}
+make_cookie_comp_chart(cookie_name = "Do-si-dos")
+```
+
+```{r shortbread}
+make_cookie_comp_chart(cookie_name = "Shortbread")
+```
+
+```{r trefoil}
+make_cookie_comp_chart(cookie_name = "Trefoil")
+```

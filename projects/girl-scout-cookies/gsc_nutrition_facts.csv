@@ -22,7 +22,7 @@ Thin Mints (ABC Baker),Dietary Fiber,1g
 Thin Mints (ABC Baker),Total Sugars,10g
 Thin Mints (ABC Baker),Protein,1g
 Thin Mints (ABC Baker),Vitamin D,0mcg
-Thin Mints (ABC Baker),Calcium,10mcg
+Thin Mints (ABC Baker),Calcium,0mcg
 Thin Mints (ABC Baker),Iron,1.6mg
 Thin Mints (ABC Baker),Potassium,0mg
 Thin Mints (Little Brownie Baker),Total Fat,7g
@@ -49,7 +49,7 @@ Lemon-Ups,Total Sugars,7g
 Lemon-Ups,Protein,1g
 Lemon-Ups,Vitamin D,9mcg
 Lemon-Ups,Calcium,0mcg
-Lemon-Ups,Iron,7mg
+Lemon-Ups,Iron,0.7mg
 Lemon-Ups,Potassium,10mg
 Lemonades,Total Fat,7g
 Lemonades,Saturated Fat,4.5g
@@ -79,13 +79,13 @@ Trefoil,Iron,1mg
 Trefoil,Potassium,35mg
 Do-si-dos,Total Fat,7g
 Do-si-dos,Saturated Fat,2g
-Do-si-dos,Trans Fat,2.5g
-Do-si-dos,Cholesterol,2.5g
-Do-si-dos,Sodium,0mg
-Do-si-dos,Total Carbohydrate,100mg
-Do-si-dos,Dietary Fiber,22g
+Do-si-dos,Trans Fat,0g
+Do-si-dos,Cholesterol,0mg
+Do-si-dos,Sodium,100mg
+Do-si-dos,Total Carbohydrate,22g
+Do-si-dos,Dietary Fiber,1g
 Do-si-dos,Total Sugars,11g
-Do-si-dos,Protein,1g
+Do-si-dos,Protein,3g
 Do-si-dos,Vitamin D,0mcg
 Do-si-dos,Calcium,15mg
 Do-si-dos,Iron,0.8mg
@@ -135,11 +135,11 @@ Samoas,Trans Fat,0g
 Samoas,Cholesterol,0mg
 Samoas,Sodium,60mg
 Samoas,Total Carbohydrate,18g
-Samoas,Dietary Fiber,9g
+Samoas,Dietary Fiber,0g
 Samoas,Total Sugars,11g
 Samoas,Protein,1g
 Samoas,Vitamin D,0mcg
-Samoas,Calcium,0mg
+Samoas,Calcium,10mg
 Samoas,Iron,0.6mg
 Samoas,Potassium,45mg
 Girl Scout S'mores,Total Fat,7g
@@ -168,9 +168,8 @@ Chocolate-Covered Girl Scout S'mores,Vitamin D,0mcg
 Chocolate-Covered Girl Scout S'mores,Calcium,0mg
 Chocolate-Covered Girl Scout S'mores,Iron,1.1mg
 Chocolate-Covered Girl Scout S'mores,Potassium,0mg
-Peanut Butter Patties,,7g
-Peanut Butter Patties,Total Fat,4g
-Peanut Butter Patties,Saturated Fat,0g
+Peanut Butter Patties,Total Fat,7g
+Peanut Butter Patties,Saturated Fat,4g
 Peanut Butter Patties,Trans Fat,0mg
 Peanut Butter Patties,Cholesterol,0mg
 Peanut Butter Patties,Sodium,90mg
@@ -195,3 +194,16 @@ Peanut Butter Sandwich,Vitamin D,0mcg
 Peanut Butter Sandwich,Calcium,0mg
 Peanut Butter Sandwich,Iron,1.2mg
 Peanut Butter Sandwich,Potassium,0mg
+Shortbread,Total Fat,4.5g
+Shortbread,Saturated Fat,2g
+Shortbread,Trans Fat,0g
+Shortbread,Cholesterol,0mg
+Shortbread,Sodium,110mg
+Shortbread,Total Carbohydrate,19g
+Shortbread,Dietary Fiber,0g
+Shortbread,Total Sugars,6g
+Shortbread,Protein,1g
+Shortbread,Vitamin D,0mcg
+Shortbread,Calcium,0mg
+Shortbread,Iron,1.2mg
+Shortbread,Potassium,0mg
