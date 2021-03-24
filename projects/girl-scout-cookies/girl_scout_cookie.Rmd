@@ -7,6 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(magrittr)
 ```
 
 ## Intro
@@ -113,7 +114,7 @@ make_cookie_comp_chart <- function(cookie_name,
   g <- 
     ggradar::ggradar(plot.data = cookie_data,
                      values.radar = c("0%", 
-                                      "100%",
+                                      "100",
                                       "450%"),
                      grid.max = 450,
                      grid.min = 0,
@@ -123,7 +124,9 @@ make_cookie_comp_chart <- function(cookie_name,
                      legend.text.size = 8,
                      grid.label.size = 4,
                      plot.extent.x.sf = 1.5, 
-                     plot.extent.y.sf = 1.5) +
+                     plot.extent.y.sf = 1.5,
+                     group.line.width = 1,
+                     group.point.size = 2) +
     ggplot2::scale_color_manual(values = pal)
   
   return(g)
