@@ -193,3 +193,7 @@ make_cookie_comp_chart(cookie_name = "Shortbread")
 ```{r trefoil}
 make_cookie_comp_chart(cookie_name = "Trefoil")
 ```
+
+```{r toffee-tastic}
+make_cookie_comp_chart(cookie_name = "Toffee-tastic")
+```
