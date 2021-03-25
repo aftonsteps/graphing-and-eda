@@ -77,12 +77,73 @@ gsc_and_fda <-
                          no = Value / DV * 100))
 ```
 
+```{r get-dist}
+get_dist_from_fda <- function(data, 
+                              method = "manhattan", 
+                              min_cookies = 5, 
+                              max_cookies = 20) {
+  fda_for_comp <- 
+    data %>% 
+    dplyr::filter(Name == "FDA Guidelines") %>% 
+    dplyr::select(fda_comp = percentage_dv_for_10_cookies)
+  
+  fda_comp_along <- 
+    rep(x = fda_for_comp$fda_comp, nrow(data) / nrow(fda_for_comp))
+  
+  data$fda_comp <- fda_comp_along
+  
+  all_cookies_distances <- 
+    data.frame(Name = character(), x_cookies = numeric(), dist = numeric())
+  
+  for (i in unique(data$Name)) {
+    one_cookie_comp <- 
+      cbind(data %>% dplyr::filter(Name == i), fda_for_comp)
+    
+    dist_so_far <- data.frame("Name" = i, "x_cookies" = NA, "dist" = 100000000)
+    
+    lesser_dist_found <- TRUE
+    
+    while(lesser_dist_found) {
+      for (j in seq(from = min_cookies, to = max_cookies, by = 1)) {
+        one_cookie_next_comp <- 
+          one_cookie_comp %>% 
+          dplyr::select(Name, percentage_dv_for_10_cookies) %>%
+          dplyr::mutate(percentage_dv_for_x_cookies = 
+                          percentage_dv_for_10_cookies * (j/10),
+                        x_cookies = j) %>%
+          cbind(fda_for_comp) %>%
+          dplyr::mutate(diff = 
+                          abs(percentage_dv_for_x_cookies - fda_comp)) %>%
+          dplyr::group_by(Name, x_cookies) %>%
+          dplyr::summarize(dist = sum(diff), .groups = "keep")
+        
+        if (one_cookie_next_comp$dist < dist_so_far$dist) {
+          lesser_dist_found <- TRUE
+          dist_so_far <- one_cookie_next_comp
+        } else { lesser_dist_found <- FALSE }
+      }
+    }
+    all_cookies_distances <- 
+      all_cookies_distances %>% 
+      dplyr::full_join(dist_so_far, by = c("Name", "x_cookies", "dist"))
+  }
+  
+  return(all_cookies_distances)
+}
+
+cookie_dists <- get_dist_from_fda(gsc_and_fda)
+gsc_and_fda_with_dists <- 
+  gsc_and_fda %>% dplyr::left_join(cookie_dists, by = "Name") %>%
+  dplyr::mutate(percentage_dv_for_x_cookies = 
+                  percentage_dv_for_10_cookies * x_cookies/10)
+```
+
 ```{r pivot-cookies-wider}
 gsc_and_fda_wide <- 
-  gsc_and_fda %>%
-  dplyr::select(Name, Nutrient, percentage_dv_for_10_cookies) %>%
+  gsc_and_fda_with_dists %>%
+  dplyr::select(Name, Nutrient, percentage_dv_for_x_cookies) %>%
   tidyr::pivot_wider(names_from = Nutrient,
-                     values_from = percentage_dv_for_10_cookies)
+                     values_from = percentage_dv_for_x_cookies)
 ```
 
 ```{r get-gsc-colors}
@@ -103,10 +164,15 @@ ggradar::ggradar(plot.data = gsc_and_fda_wide,
   ggplot2::scale_color_manual(values = gsc_pal)
 ```
 
+```{r get-radar-chart-max}
+radar_max <- max(gsc_and_fda_wide %>% dplyr::select(where(is.numeric)))
+```
+
 ```{r make-charting-function}
 make_cookie_comp_chart <- function(cookie_name, 
                                    cookie_data = gsc_and_fda_wide, 
-                                   pal = gsc_pal) {
+                                   pal = gsc_pal,
+                                   max = radar_max) {
   cookie_data <- 
     cookie_data %>% 
     dplyr::filter(Name %in% c(cookie_name, "FDA Guidelines"))
@@ -115,8 +181,8 @@ make_cookie_comp_chart <- function(cookie_name,
     ggradar::ggradar(plot.data = cookie_data,
                      values.radar = c("0%", 
                                       "100",
-                                      "450%"),
-                     grid.max = 450,
+                                      paste0(radar_max, "%")),
+                     grid.max = radar_max,
                      grid.min = 0,
                      grid.mid = 100,
                      legend.position = "bottom",
