@@ -65,7 +65,8 @@ gsc_and_fda <-
                 units = ifelse(test = Nutrient == "Calcium",
                                yes = "mg",
                                units)) %>%
-  dplyr::full_join(fda_as_cookie, by = c("Name", "Nutrient", "Value", "units")) %>%
+  dplyr::full_join(fda_as_cookie, 
+                   by = c("Name", "Nutrient", "Value", "units")) %>%
   dplyr::inner_join(fda, by = "Nutrient") %>%
   dplyr::mutate(units = gsub(pattern = "\\.",
                              replacement = "",
@@ -154,11 +155,18 @@ shades::swatch(gsc_pal)
 
 ```{r make-everything-radar-chart}
 ggradar::ggradar(plot.data = gsc_and_fda_wide,
+                 base.size = 4,
+                 grid.label.size = 4,
+                 axis.label.size = 3,
+                 group.line.width = 1, 
+                 group.point.size = 3,
+                 legend.text.size = 6,
+                 legend.position = "none",
                  values.radar = c("0%", 
                                   "100%",
-                                  paste0(max(gsc_and_fda$percentage_dv_for_10_cookies),
+                                  paste0(max(gsc_and_fda_with_dists$percentage_dv_for_x_cookies),
                                          "%")),
-                 grid.max = max(gsc_and_fda$percentage_dv_for_10_cookies),
+                 grid.max = max(gsc_and_fda_with_dists$percentage_dv_for_x_cookies),
                  grid.min = 0,
                  grid.mid = 100) +
   ggplot2::scale_color_manual(values = gsc_pal)
@@ -166,16 +174,27 @@ ggradar::ggradar(plot.data = gsc_and_fda_wide,
 
 ```{r get-radar-chart-max}
 radar_max <- max(gsc_and_fda_wide %>% dplyr::select(where(is.numeric)))
+radar_max
 ```
-
 ```{r make-charting-function}
 make_cookie_comp_chart <- function(cookie_name, 
-                                   cookie_data = gsc_and_fda_wide, 
+                                   cookie_data = gsc_and_fda_wide,
+                                   distance_data = gsc_and_fda_with_dists,
                                    pal = gsc_pal,
                                    max = radar_max) {
   cookie_data <- 
     cookie_data %>% 
     dplyr::filter(Name %in% c(cookie_name, "FDA Guidelines"))
+  
+  distance_data <-
+    distance_data %>%
+    dplyr::filter(Name %in% c(cookie_name))
+  
+  distance <- unique(round(distance_data$dist, digits = 0))
+  
+  num_cookies <- unique(distance_data$x_cookies)
+  
+  d <- cowplot::draw_image(image = "peanut_butter_sandwich.jpg")
   
   g <- 
     ggradar::ggradar(plot.data = cookie_data,
@@ -189,13 +208,23 @@ make_cookie_comp_chart <- function(cookie_name,
                      axis.label.size = 3,
                      legend.text.size = 8,
                      grid.label.size = 4,
+                     background.circle.colour = "#000000",
+                     background.circle.transparency = 0,
                      plot.extent.x.sf = 1.5, 
                      plot.extent.y.sf = 1.5,
                      group.line.width = 1,
                      group.point.size = 2) +
-    ggplot2::scale_color_manual(values = pal)
+    ggplot2::scale_color_manual(values = pal) +
+    ggplot2::geom_text(label = paste0("Distance: ", distance), 
+                       x = 700, 
+                       y = 400,
+                       size = 3) +
+    ggplot2::geom_text(label = paste0("Cookies: ", num_cookies), 
+                       x = 700, 
+                       y = 360,
+                       size = 3)
   
-  return(g)
+  return(cowplot::ggdraw() + d + cowplot::draw_plot(g))
 }
 
 ```
@@ -262,4 +291,27 @@ make_cookie_comp_chart(cookie_name = "Trefoil")
 
 ```{r toffee-tastic}
 make_cookie_comp_chart(cookie_name = "Toffee-tastic")
+```
+
+```{r loser}
+gsc_and_fda_with_dists %>%
+  dplyr::filter(dist == max(dist, na.rm = TRUE)) %>%
+  dplyr::select(Name) %>%
+  dplyr::distinct()
+```
+
+```{r winner}
+gsc_and_fda_with_dists %>%
+  dplyr::filter(Name != "FDA Guidelines") %>%
+  dplyr::filter(dist == min(dist, na.rm = TRUE)) %>%
+  dplyr::select(Name) %>%
+  dplyr::distinct()
+```
+
+```{r ranked_cookies}
+gsc_and_fda_with_dists_rank <-
+  gsc_and_fda_with_dists %>%
+  dplyr::select(Name, dist) %>%
+  dplyr::arrange(dist) %>%
+  dplyr::distinct()
 ```
